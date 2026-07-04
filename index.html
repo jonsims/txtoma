@@ -1,0 +1,711 @@
+<title>Austin → Needham · Supercharger Route Card</title>
+<style>
+  :root {
+    --paper:   #F1EEE4;
+    --paper-2: #FBFAF4;
+    --ink:     #1B211D;
+    --muted:   #6B716A;
+    --faint:   #8C9188;
+    --line:    #DDD8CA;
+    --line-2:  #E9E5D9;
+    --charge:  #10906A;   /* power / charging — the accent */
+    --charge-soft: #E2EFE7;
+    --anchor:  #B8701A;   /* the relax anchor — sun amber */
+    --anchor-soft: #F3E7D3;
+    --warn:    #A6552F;
+
+    --ff-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --ff-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Charter", Georgia, serif;
+    --shadow: 0 1px 2px rgba(27,33,29,.05), 0 6px 20px rgba(27,33,29,.06);
+    --radius: 13px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:   #14171A;
+      --paper-2: #1C2126;
+      --ink:     #ECEADF;
+      --muted:   #9AA29A;
+      --faint:   #767E77;
+      --line:    #2A3036;
+      --line-2:  #222831;
+      --charge:  #26BE84;
+      --charge-soft: #16302A;
+      --anchor:  #E39C46;
+      --anchor-soft: #33291A;
+      --warn:    #E08A5C;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.34);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper:#F1EEE4; --paper-2:#FBFAF4; --ink:#1B211D; --muted:#6B716A; --faint:#8C9188;
+    --line:#DDD8CA; --line-2:#E9E5D9; --charge:#10906A; --charge-soft:#E2EFE7;
+    --anchor:#B8701A; --anchor-soft:#F3E7D3; --warn:#A6552F;
+    --shadow:0 1px 2px rgba(27,33,29,.05), 0 6px 20px rgba(27,33,29,.06);
+  }
+  :root[data-theme="dark"] {
+    --paper:#14171A; --paper-2:#1C2126; --ink:#ECEADF; --muted:#9AA29A; --faint:#767E77;
+    --line:#2A3036; --line-2:#222831; --charge:#26BE84; --charge-soft:#16302A;
+    --anchor:#E39C46; --anchor-soft:#33291A; --warn:#E08A5C;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.34);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--ff-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: clamp(20px, 5vw, 56px) clamp(16px, 5vw, 40px) 80px; }
+
+  h1,h2,h3 { margin: 0; text-wrap: balance; line-height: 1.15; }
+  p { margin: 0; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* ---------- masthead ---------- */
+  .mast { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--charge); font-weight: 700; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(34px, 7vw, 62px);
+    font-weight: 800; letter-spacing: -.02em;
+  }
+  h1 .arrow { color: var(--faint); font-weight: 400; margin: 0 .12em; }
+  .dek {
+    font-family: var(--ff-serif); font-size: clamp(16px, 2.4vw, 20px);
+    color: var(--muted); margin-top: 14px; max-width: 60ch; line-height: 1.5;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: .01em;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--paper-2); border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .chip b { color: var(--charge); font-weight: 800; }
+
+  /* ---------- route map ---------- */
+  .mapfig {
+    margin: 24px 0 2px; padding: 20px 20px 16px;
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: 16px; box-shadow: var(--shadow);
+  }
+  .mapfig svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .route-line {
+    fill: none; stroke: var(--charge); stroke-width: 1.5;
+    stroke-linejoin: round; stroke-linecap: round;
+  }
+  .route-dot { fill: var(--paper-2); stroke: var(--charge); stroke-width: 1.3; }
+  .route-anchor { fill: var(--anchor); stroke: var(--paper-2); stroke-width: 1; }
+  .route-stay { fill: var(--ink); stroke: var(--paper-2); stroke-width: 1; }
+  .route-label { fill: var(--ink); font: 700 3.1px var(--ff-sans); }
+  .route-label.amber { fill: var(--anchor); }
+  .route-label.end { fill: var(--charge); }
+  .map-legend {
+    display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px;
+    font-size: 11.5px; color: var(--muted); font-weight: 600;
+  }
+  .map-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .lg-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--charge); box-sizing: border-box; }
+  .lg-anchor { width: 10px; height: 10px; border-radius: 50%; background: var(--anchor); }
+  .lg-stay { width: 9px; height: 9px; background: var(--ink); border-radius: 2px; }
+
+  /* ---------- intro ---------- */
+  .lead {
+    font-family: var(--ff-serif); font-size: clamp(16px, 2.3vw, 19px);
+    line-height: 1.62; margin: 30px 0 8px; max-width: 66ch; color: var(--ink);
+  }
+  .lead em { color: var(--charge); font-style: italic; }
+
+  /* two constraint cards */
+  .constraints { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 26px 0 6px; }
+  @media (max-width: 620px){ .constraints { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .card .kicker {
+    font-size: 11.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .card.l1 .kicker { color: var(--warn); }
+  .card.l2 .kicker { color: var(--charge); }
+  .card h3 { font-size: 16px; margin-bottom: 6px; letter-spacing: -.01em; }
+  .card p { font-size: 14px; color: var(--muted); }
+  .card p b { color: var(--ink); }
+
+  /* ---------- day sections ---------- */
+  section.day { margin-top: 54px; }
+  .day-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; padding-bottom: 16px;
+  }
+  .day-id {
+    font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--charge); margin-bottom: 6px;
+  }
+  .day-route { font-size: clamp(21px, 3.4vw, 28px); font-weight: 800; letter-spacing: -.015em; }
+  .day-route .arrow { color: var(--faint); font-weight: 400; margin: 0 .18em; }
+  .day-stats { display: flex; gap: 22px; }
+  .stat .n { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+  .stat .l { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+
+  /* battery / SoC meter */
+  .socrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .soc {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: 10px; flex-wrap: wrap; flex: 1 1 300px;
+  }
+  .soc .lab { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+  .battery {
+    position: relative; flex: 1 1 160px; min-width: 140px; height: 20px;
+    border: 1.5px solid var(--line); border-radius: 5px; background: var(--paper);
+    overflow: hidden;
+  }
+  .battery::after {
+    content:""; position:absolute; right:-5px; top:50%; transform:translateY(-50%);
+    width:4px; height:9px; background: var(--line); border-radius:0 2px 2px 0;
+  }
+  .battery .fill {
+    position:absolute; left:0; top:0; bottom:0; width: calc(var(--soc,80) * 1%);
+    background: linear-gradient(90deg, var(--charge), color-mix(in srgb, var(--charge) 78%, #ffffff));
+    border-radius: 3px;
+  }
+  .soc .val { font-size: 13px; font-weight: 800; color: var(--charge); letter-spacing:.02em; }
+
+  .day-maps {
+    font-size: 12.5px; font-weight: 700; color: var(--charge); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+    border: 1px solid color-mix(in srgb, var(--charge) 35%, var(--line));
+    border-radius: 999px; padding: 9px 15px; background: var(--paper-2);
+  }
+  .day-maps:hover { background: var(--charge-soft); }
+
+  /* stop list on a route spine */
+  .stops { position: relative; margin: 22px 0 0; padding-left: 34px; }
+  .stops::before {
+    content:""; position:absolute; left: 9px; top: 8px; bottom: 24px; width: 2px;
+    background: linear-gradient(var(--charge), color-mix(in srgb, var(--charge) 30%, var(--line)));
+    border-radius: 2px;
+  }
+  .stop { position: relative; padding: 0 0 22px; }
+  .stop::before {
+    content:""; position:absolute; left: -34px; top: 3px; width: 20px; height: 20px;
+    border-radius: 50%; background: var(--paper);
+    border: 3px solid var(--charge); box-shadow: 0 0 0 3px var(--paper);
+  }
+  .stop.anchor::before { border-color: var(--anchor); background: var(--anchor); }
+  .stop.dest::before { border-color: var(--faint); background: var(--faint); }
+  .stop.insurance::before { border-style: dashed; }
+
+  .stopcard {
+    background: var(--paper-2); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .stop.anchor .stopcard {
+    border-color: color-mix(in srgb, var(--anchor) 45%, var(--line));
+    background: color-mix(in srgb, var(--anchor-soft) 55%, var(--paper-2));
+  }
+  .stop-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .stop-name { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+  .stop-name .city { color: var(--muted); font-weight: 600; font-size: 14px; }
+  .mi { font-size: 12.5px; font-weight: 700; color: var(--faint); white-space: nowrap; letter-spacing: .02em; }
+
+  .stop-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 10px; }
+  .pill {
+    font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px; border: 1px solid transparent;
+  }
+  .pill.role-anchor { color: var(--anchor); background: var(--anchor-soft); }
+  .pill.role-topup  { color: var(--charge); background: var(--charge-soft); }
+  .pill.role-ins    { color: var(--muted); border-color: var(--line); background: transparent; }
+  .pill.role-dest   { color: var(--faint); border-color: var(--line); background: transparent; }
+  .spec {
+    font-size: 12.5px; font-weight: 700; color: var(--ink); letter-spacing: .01em;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .spec .bolt { color: var(--charge); }
+  .spec .sep { color: var(--line); }
+  .why { font-family: var(--ff-serif); font-size: 14.5px; line-height: 1.55; color: var(--muted); }
+  .why b { color: var(--ink); font-weight: 600; font-family: var(--ff-sans); }
+
+  /* outbound links */
+  .out { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line-2); }
+  .out a {
+    font-size: 12px; font-weight: 700; letter-spacing: .01em; color: var(--charge);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+    border-bottom: 1px solid transparent; padding-bottom: 1px;
+  }
+  .out a:hover { border-bottom-color: color-mix(in srgb, var(--charge) 45%, transparent); }
+  .out a .ext { font-size: 9px; opacity: .65; transform: translateY(-1px); }
+  .out a.alt { color: var(--muted); }
+
+  /* tradeoff + note blocks */
+  .note {
+    margin-top: 14px; border-left: 3px solid var(--charge);
+    background: var(--paper-2); border-radius: 0 10px 10px 0;
+    padding: 14px 18px; box-shadow: var(--shadow);
+  }
+  .note.amber { border-left-color: var(--anchor); }
+  .note h4 {
+    margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--charge); font-weight: 800;
+  }
+  .note.amber h4 { color: var(--anchor); }
+  .note p { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
+  .note p:first-of-type { margin-top: 0; }
+  .note p b { color: var(--ink); }
+  .rec { color: var(--charge); font-weight: 800; }
+
+  .overnight {
+    margin-top: 6px; display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13.5px; color: var(--muted); padding: 12px 16px;
+    background: var(--paper); border: 1px dashed var(--line); border-radius: 10px;
+  }
+  .overnight .moon { font-size: 15px; line-height: 1.4; }
+  .overnight b { color: var(--ink); }
+  .overnight a { color: var(--charge); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--charge) 40%, transparent); }
+  .overnight a:hover { border-bottom-color: var(--charge); }
+
+  /* ---------- anchors summary ---------- */
+  .anchors {
+    margin-top: 58px; padding: 26px; border-radius: 16px;
+    background: color-mix(in srgb, var(--anchor-soft) 40%, var(--paper-2));
+    border: 1px solid color-mix(in srgb, var(--anchor) 30%, var(--line));
+  }
+  .anchors h2 { font-size: 20px; letter-spacing: -.01em; }
+  .anchors .sub { font-family: var(--ff-serif); color: var(--muted); font-size: 14.5px; margin: 6px 0 18px; max-width: 60ch; }
+  .agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 720px){ .agrid { grid-template-columns: 1fr; } }
+  .acard { background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .acard .d { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--anchor); }
+  .acard .nm { font-size: 16px; font-weight: 800; margin: 6px 0 6px; letter-spacing: -.01em; }
+  .acard .ds { font-family: var(--ff-serif); font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- checklist ---------- */
+  .verify { margin-top: 54px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .verify h2 { font-size: 20px; letter-spacing: -.01em; }
+  .verify > p { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 64ch; font-family: var(--ff-serif); }
+  .checkcols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+  @media (max-width: 680px){ .checkcols { grid-template-columns: 1fr; } }
+  .col h4 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+  .col.done h4 { color: var(--charge); }
+  .col.todo h4 { color: var(--anchor); }
+  ul.ck { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  ul.ck li { position: relative; padding-left: 26px; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+  ul.ck li b { color: var(--ink); font-weight: 600; }
+  ul.ck li::before { position: absolute; left: 0; top: 1px; font-weight: 800; font-size: 13px; }
+  .col.done li::before { content: "✓"; color: var(--charge); }
+  .col.todo li::before { content: "○"; color: var(--anchor); top: 0; }
+
+  footer { margin-top: 46px; font-size: 12px; color: var(--faint); text-align: center; line-height: 1.6; }
+  footer .dot { margin: 0 6px; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+  }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--charge); outline-offset: 3px; border-radius: 4px; }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="eyebrow">Supercharger Route Card · Return Trip</div>
+    <h1>Austin <span class="arrow">→</span> Needham</h1>
+    <p class="dek">Chargers chosen as <em>destinations</em>, not waypoints the car picks. Fewer, better stops — shade, seating off the ground, a walkable carry-out, and grass to walk Luna away from the crowd.</p>
+    <div class="chips">
+      <span class="chip">🚗 Model Y <b>Long Range</b></span>
+      <span class="chip">3 days · <b>Jul 9–11</b></span>
+      <span class="chip">≈<b>2,005</b> mi</span>
+      <span class="chip">Christina + Luna 🐕</span>
+      <span class="chip">Plan legs <b>~230 mi</b></span>
+    </div>
+
+    <figure class="mapfig" aria-label="Schematic map of the route from Austin, Texas to Needham, Massachusetts">
+      <svg viewBox="0 0 100 54" role="img">
+        <polyline class="route-line"
+          points="6,48 10,44 16,40 25,37 34,34 43,31 51,30 57,27 61,25 68,20 80,15 89,10 93,8" />
+        <!-- plain charging stops -->
+        <circle class="route-dot" cx="10" cy="44" r="1.5"/>
+        <circle class="route-dot" cx="43" cy="31" r="1.5"/>
+        <circle class="route-dot" cx="51" cy="30" r="1.5"/>
+        <circle class="route-dot" cx="57" cy="27" r="1.5"/>
+        <circle class="route-dot" cx="68" cy="20" r="1.5"/>
+        <circle class="route-dot" cx="89" cy="10" r="1.5"/>
+        <!-- anchor stops -->
+        <circle class="route-anchor" cx="16" cy="40" r="1.9"/>
+        <circle class="route-anchor" cx="34" cy="34" r="1.9"/>
+        <circle class="route-anchor" cx="80" cy="15" r="1.9"/>
+        <!-- overnights (squares) -->
+        <rect class="route-stay" x="23.3" y="35.3" width="3.4" height="3.4" rx="0.6"/>
+        <rect class="route-stay" x="59.3" y="23.3" width="3.4" height="3.4" rx="0.6"/>
+        <!-- start / end -->
+        <circle class="route-stay" cx="6" cy="48" r="1.9"/>
+        <circle class="route-label" cx="93" cy="8" r="0"/>
+        <path class="route-anchor" d="M93 5.6 l0.7 1.5 1.6 0.2 -1.2 1.1 0.3 1.6 -1.4 -0.8 -1.4 0.8 0.3 -1.6 -1.2 -1.1 1.6 -0.2 z" style="fill:var(--charge);stroke:var(--paper-2);stroke-width:.5"/>
+        <!-- labels -->
+        <text class="route-label" x="4"  y="52">Austin</text>
+        <text class="route-label amber" x="12.5" y="44.6">Sulphur Springs</text>
+        <text class="route-label" x="22" y="41.8" text-anchor="start" style="font-weight:800">Little Rock ·1</text>
+        <text class="route-label amber" x="31.5" y="38">Jackson</text>
+        <text class="route-label" x="55.5" y="24" style="font-weight:800">Check, VA ·2</text>
+        <text class="route-label amber" x="74" y="15.5">Clinton</text>
+        <text class="route-label end" x="84.5" y="6.5" style="font-weight:800">Needham</text>
+      </svg>
+      <div class="map-legend">
+        <span><i class="lg-stay"></i> Overnight (1 · Little Rock, 2 · Check VA)</span>
+        <span><i class="lg-anchor"></i> Anchor / relax stop</span>
+        <span><i class="lg-dot"></i> Charging top-up</span>
+      </div>
+    </figure>
+  </header>
+
+  <p class="lead">Last trip stacked up too many stops, each chosen for the fewest charging minutes, at exposed strip-mall chargers with nowhere good to be with a reactive dog in the July heat. This time the plan anchors each day on <em>one</em> genuinely pleasant place and keeps everything else short. Two overnight plugs shape the whole thing.</p>
+
+  <div class="constraints">
+    <div class="card l1">
+      <div class="kicker">◐ Little Rock · Level 1 only</div>
+      <h3>Arrive ~80%, wake at ~95%</h3>
+      <p>A 120V plug adds just ~3–4 mi/hr → ~45–55 mi overnight. So Day 1's <b>final stop tops up only enough to arrive ~80%</b>. Chasing a true 100% would mean arriving ~85% — not worth it; ~95% covers Day 2's first leg easily.</p>
+    </div>
+    <div class="card l2">
+      <div class="kicker">⚡ Check, VA · Level 2</div>
+      <h3>Arrive low, leave full</h3>
+      <p>~25–30 mi/hr recovers a full charge overnight regardless of arrival state. <b>No last-stop constraint on Day 2</b> — roll in low, leave Day 3 at 100%.</p>
+    </div>
+  </div>
+
+  <!-- DAY 1 -->
+  <section class="day reveal">
+    <div class="day-head">
+      <div>
+        <div class="day-id">Day 1 · Thu Jul 9</div>
+        <div class="day-route">Austin <span class="arrow">→</span> Little Rock</div>
+      </div>
+      <div class="day-stats">
+        <div class="stat"><div class="n tnum">~465</div><div class="l">miles</div></div>
+        <div class="stat"><div class="n tnum">~7h</div><div class="l">driving</div></div>
+        <div class="stat"><div class="n tnum">3</div><div class="l">stops</div></div>
+      </div>
+    </div>
+    <div class="socrow">
+      <div class="soc">
+        <span class="lab">Start 100%</span>
+        <div class="battery" style="--soc:80"><div class="fill"></div></div>
+        <span class="val">Arrive ~80%</span>
+      </div>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Austin,TX&destination=Little+Rock,AR&waypoints=Collin+Street+Bakery+Waco+TX%7CTesla+Supercharger+Sulphur+Springs+TX%7COutlets+of+Little+Rock+Supercharger&travelmode=driving" target="_blank" rel="noopener">🗺 Open Day 1 route ↗</a>
+    </div>
+
+    <div class="stops">
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Collin Street Bakery <span class="city">· Waco, TX</span></div><div class="mi tnum">100 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">Beat-the-heat lunch</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 22 stalls</span>
+          </div>
+          <p class="why">Fresh bakery/deli with an <b>A/C dining room</b>, free coffee for Tesla drivers, and dog treats on the shelf. Best food-plus-fast-charge on the corridor; the indoor cool is the July win. Use the far pedestals for full power. Store closes 6 PM.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Collin+Street+Bakery+Supercharger+Waco+TX" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+            <a class="alt" href="https://cafe.collinstreet.com/waco-bakery/" target="_blank" rel="noopener">Bakery menu <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop anchor">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Downtown Square <span class="city">· Sulphur Springs, TX</span></div><div class="mi tnum">280 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-anchor">★ Anchor · the stretch</span>
+            <span class="spec"><span class="bolt">⚡</span>150 kW <span class="sep">·</span> 8 stalls</span>
+          </div>
+          <p class="why">The only real <b>town center</b> on the route: Celebration Plaza with shaded bistro seating, Buford Park's pond and trees, and walkable carry-out (Corner Grub House, Pioneer Cafe, Arturo's). <b>For Luna:</b> walk her a block off the square on quiet side streets, away from the plaza crowd — flexibility a Buc-ee's can't give. 150 kW is fine since you're lingering anyway.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+300+W+Tomlinson+St+Sulphur+Springs+TX" target="_blank" rel="noopener">Charger <span class="ext">↗</span></a>
+            <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Buford+Park+Sulphur+Springs+TX" target="_blank" rel="noopener">Buford Park <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Outlets of Little Rock <span class="city">· final top-up</span></div><div class="mi tnum">~12 mi out</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">Mandatory top-up</span>
+            <span class="spec"><span class="bolt">⚡</span>325 kW V3 <span class="sep">·</span> 16 stalls</span>
+          </div>
+          <p class="why">Charge to <b>~85% so you arrive ~80%</b> for the overnight trickle — a quick stop at this fast V3 site. Bonus: a <b>dog park is right there</b> for a last leg-stretch. Alt if busy: North Little Rock Cracker Barrel (16 / 325 kW).</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Outlets+of+Little+Rock" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overnight">
+      <span class="moon">🌙</span>
+      <div><b>Overnight · Little Rock</b> (Pettaway Park area) — Level 1 plug; plug in on arrival. Dinner from the food truck next door, <a href="https://moodybrews.co/food-menu" target="_blank" rel="noopener">Moody Brews</a>.</div>
+    </div>
+  </section>
+
+  <!-- DAY 2 -->
+  <section class="day reveal">
+    <div class="day-head">
+      <div>
+        <div class="day-id">Day 2 · Fri Jul 10</div>
+        <div class="day-route">Little Rock <span class="arrow">→</span> Check, VA</div>
+      </div>
+      <div class="day-stats">
+        <div class="stat"><div class="n tnum">~760</div><div class="l">miles</div></div>
+        <div class="stat"><div class="n tnum">~11h</div><div class="l">driving</div></div>
+        <div class="stat"><div class="n tnum">3–4</div><div class="l">charges</div></div>
+      </div>
+    </div>
+    <div class="socrow">
+      <div class="soc">
+        <span class="lab">Start 100%</span>
+        <div class="battery" style="--soc:18"><div class="fill"></div></div>
+        <span class="val">Arrive low → L2</span>
+      </div>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Little+Rock,AR&destination=Check,VA&waypoints=Casey+Jones+Village+Jackson+TN%7CTesla+Supercharger+Cookeville+TN%7CTesla+Supercharger+Brookview+Centre+Way+Knoxville+TN%7CTesla+Supercharger+Bristol+VA+Euclid+Ave&travelmode=driving" target="_blank" rel="noopener">🗺 Open Day 2 route ↗</a>
+    </div>
+
+    <div class="stops">
+      <div class="stop anchor">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Casey Jones Village <span class="city">· Jackson, TN</span></div><div class="mi tnum">224 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-anchor">★ Anchor · lunch</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 24 stalls</span>
+          </div>
+          <p class="why">The best stop of the whole trip — the Supercharger sits <b>inside a historic village</b>: Old Country Store buffet (carry-out capable), lawns and gardens, shaded walkways, a steam locomotive. Real perimeter grass to walk Luna away from foot traffic, and a long charge that overlaps lunch.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Casey+Jones+Village+Jackson+TN" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+            <a class="alt" href="https://www.caseyjones.com/" target="_blank" rel="noopener">Village site <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Jackson Plaza <span class="city">· Cookeville, TN</span></div><div class="mi tnum">430 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">Quick carry-out</span>
+            <span class="spec"><span class="bolt">⚡</span>150 kW <span class="sep">·</span> 8 stalls</span>
+          </div>
+          <p class="why">Jimmy John's / Taco Bell / Food Lion adjacent. <b>Throttles to ~66 kW when stalls share</b> — allow extra time. Lot-edge grass only; a relief stop, not a lounge.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Cookeville+TN+Jackson+Plaza" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop insurance">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Brookview Centre Way <span class="city">· Knoxville, TN</span></div><div class="mi tnum">530 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-ins">Insurance · skippable</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 8 stalls</span>
+          </div>
+          <p class="why">Newer and less congested than old Turkey Creek. A 10-minute splash here removes all risk before the Virginia mountains. Skip it if range is healthy.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Brookview+Centre+Way+Knoxville+TN" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Royal Farms <span class="city">· Bristol or Abingdon, VA</span></div><div class="mi tnum">645–660 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">Charge for the finish</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 8 stalls</span>
+          </div>
+          <p class="why">Fast, with on-site food and restrooms; Abingdon town has more walkable options. Charge enough for the final ~100–115 mi. <b>Watch:</b> a new Wytheville–Lithia Rd site (Cracker Barrel, 500 kW) is under construction — a big upgrade if it's live by July.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1200+Euclid+Ave+Bristol+VA" target="_blank" rel="noopener">Bristol <span class="ext">↗</span></a>
+            <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+25016+Lee+Highway+Abingdon+VA" target="_blank" rel="noopener">Abingdon <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop dest">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Check, VA <span class="city">· rural Airbnb (Floyd County)</span></div><div class="mi tnum">~760 mi</div></div>
+          <div class="stop-meta"><span class="pill role-dest">Overnight · Level 2</span></div>
+          <p class="why">Arrive low and plug into the Airbnb's Level 2 to leave at 100%. <b>Note:</b> Christiansburg has no Tesla Supercharger — Wytheville (150 kW) is the last option, only if you'd otherwise land below ~15–20%.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h4>The tradeoff · 3 vs 4 charges</h4>
+      <p><span class="rec">Recommended — 4 charges:</span> Jackson → Cookeville → Knoxville splash → Bristol/Abingdon. No leg over ~130 mi after Jackson; the splash de-risks the mountains and barely costs time since Jackson is a long lunch anyway.</p>
+      <p><b>Lean — 3 charges:</b> drop Knoxville, but Cookeville→Bristol becomes <b>~215 mi through the mountains</b> — leave Cookeville at 90%+ (a long session at a slow 150 kW site) and watch consumption.</p>
+    </div>
+  </section>
+
+  <!-- DAY 3 -->
+  <section class="day reveal">
+    <div class="day-head">
+      <div>
+        <div class="day-id">Day 3 · Sat Jul 11</div>
+        <div class="day-route">Check, VA <span class="arrow">→</span> Needham</div>
+      </div>
+      <div class="day-stats">
+        <div class="stat"><div class="n tnum">~780</div><div class="l">miles</div></div>
+        <div class="stat"><div class="n tnum">~11h</div><div class="l">driving</div></div>
+        <div class="stat"><div class="n tnum">3</div><div class="l">charges</div></div>
+      </div>
+    </div>
+    <div class="socrow">
+      <div class="soc">
+        <span class="lab">Start 100%</span>
+        <div class="battery" style="--soc:20"><div class="fill"></div></div>
+        <span class="val">Home w/ margin</span>
+      </div>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=104+Meadow+Run+Rd+SE+Check+VA&destination=Needham,MA&waypoints=Tesla+Supercharger+Winchester+VA+Berryville+Pike%7CClinton+Station+Diner+NJ%7CTesla+Supercharger+Sturbridge+MA&travelmode=driving" target="_blank" rel="noopener">🗺 Open Day 3 route ↗</a>
+    </div>
+
+    <div class="stops">
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Sheetz · Berryville Pike <span class="city">· Winchester, VA</span></div><div class="mi tnum">215 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">Out of the Valley</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 8 stalls</span>
+          </div>
+          <p class="why">Sheetz Made-To-Order is the best fast-casual carry-out on the first half — touchscreen order, real food, fast. Lot-edge grass for a quick dog leg; a ~20–25 min V3 top-up is exactly the length of a food order and a walk.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1683+Berryville+Pike+Winchester+VA" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop anchor">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Clinton Station Diner <span class="city">· Clinton, NJ</span></div><div class="mi tnum">410 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-anchor">★ Anchor · before the crunch</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 12–15 stalls</span>
+          </div>
+          <p class="why">An actual <b>place</b>, not a lot: a 1927 rail-car diner with a famous dessert case, sit-down or carry-out — and it lands <b>right before</b> the I-287 / Tappan Zee / NYC crunch. <b>For Luna:</b> historic downtown Clinton (the Red Mill and the South Branch Raritan riverside walk) is ~1 mi away — quiet grass and water, away from crowds.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Clinton+Station+Diner+Clinton+NJ" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+            <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Red+Mill+Museum+Clinton+NJ" target="_blank" rel="noopener">Red Mill / river walk <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Sturbridge Plaza <span class="city">· Sturbridge, MA</span></div><div class="mi tnum">600 mi in</div></div>
+          <div class="stop-meta">
+            <span class="pill role-topup">The post-traffic exhale</span>
+            <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 12 stalls</span>
+          </div>
+          <p class="why">After Danbury, Waterbury and Hartford: a pleasant New England town at the I-84 / Mass Pike seam with plaza restaurants, Dunkin, and real greenspace (town common, Old Sturbridge Village grounds) for a proper dog walk. Only <b>~55 mi from home</b> — charge just enough to finish, keep it short.</p>
+          <div class="out">
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Sturbridge+MA" target="_blank" rel="noopener">Maps <span class="ext">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="stop dest">
+        <div class="stopcard">
+          <div class="stop-top"><div class="stop-name">Needham, MA <span class="city">· home</span></div><div class="mi tnum">~780 mi</div></div>
+          <div class="stop-meta"><span class="pill role-dest">Arrive</span></div>
+          <p class="why">Skip Framingham — you're 20 minutes out.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note amber">
+      <h4>The tradeoff · 3 vs 4 charges</h4>
+      <p><span class="rec" style="color:var(--anchor)">Recommended — 3 charges:</span> Winchester → Clinton → Sturbridge. Spacing 215 / 195 / 190 / 55 mi — every leg under 230 with buffer, all three 250 kW V3. Clean.</p>
+      <p><b>Conservative — add a 4th:</b> a short splash at Southington, CT (Target, 250 kW) splits the Clinton→Sturbridge leg if the hilly, traffic-heavy CT stretch leaves you wanting cushion. Fast insurance, not a relax stop — save that for Sturbridge.</p>
+    </div>
+  </section>
+
+  <!-- ANCHORS -->
+  <div class="anchors reveal">
+    <h2>The anchor stops</h2>
+    <p class="sub">One place a day worth lingering at. Everything else is a short, deliberate top-up. Chargers go into nav in order, as chosen destinations — the car doesn't auto-pick.</p>
+    <div class="agrid">
+      <div class="acard">
+        <div class="d">Day 1</div>
+        <div class="nm">Sulphur Springs Square</div>
+        <div class="ds">Shaded plaza seating, walkable carry-out, quiet grass a block off-square for Luna. (Plus a cool A/C lunch at Waco.)</div>
+      </div>
+      <div class="acard">
+        <div class="d">Day 2</div>
+        <div class="nm">Casey Jones Village</div>
+        <div class="ds">Buffet lunch on-site, village lawns and gardens to walk the dog, a fast 250 kW / 24-stall site.</div>
+      </div>
+      <div class="acard">
+        <div class="d">Day 3</div>
+        <div class="nm">Clinton Station Diner</div>
+        <div class="ds">A real diner with a riverside dog walk nearby, positioned right before the NYC crunch. (Sturbridge is the exhale after.)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFY -->
+  <div class="verify reveal">
+    <h2>Verification &amp; pre-departure</h2>
+    <p>Every chosen Supercharger was cross-checked against open data (supercharge.info inventory + OpenStreetMap). PlugShare and ABRP are closed apps that can't be queried directly — those stay a browser step the week of travel.</p>
+    <div class="checkcols">
+      <div class="col done">
+        <h4>Verified now</h4>
+        <ul class="ck">
+          <li>All stops <b>confirmed open</b> with correct coordinates; specs matched — <b>except Little Rock Outlets, which is better than assumed</b> (16 / 325 kW V3).</li>
+          <li>Strong quick-food clusters at Hope, Cookeville, Knoxville, Abingdon.</li>
+          <li>Anchor greenspace (Buford Park, Casey Jones grounds, Clinton riverside, Sturbridge common) is human-verified — OSM just doesn't tag it.</li>
+          <li><b>Upgrades to watch:</b> Wytheville–Lithia Rd (500 kW, under construction); Waco–Circle Rd (Rudy's, 325 kW, permitted).</li>
+        </ul>
+      </div>
+      <div class="col todo">
+        <h4>Do the week of travel</h4>
+        <ul class="ck">
+          <li>Check <b>live stall availability</b> on the PlugShare app (uptime, ICE-ing, queues).</li>
+          <li>Confirm <b>carry-out hours vs. ETA</b> — Collin Street Bakery closes 6 PM; Casey Jones buffet; Clinton diner.</li>
+          <li>One <b>ABRP run</b> (Model Y LR + July temp) to lock exact arrival percentages, esp. Day 1 landing ~80%.</li>
+          <li>Pick <b>3- vs 4-charge</b> for Days 2 &amp; 3 the morning-of, from actual SoC and weather.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Supercharger-first route card <span class="dot">·</span> Model Y Long Range <span class="dot">·</span> ~230 mi comfortable legs, July heat
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var els = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      els.forEach(function (e) { e.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
