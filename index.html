@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <title>Austin → Needham · Supercharger Route Card</title>
 <style>
   :root {
@@ -13,12 +15,11 @@
     --faint:   #6D726B;
     --line:    #DDD8CA;
     --line-2:  #E9E5D9;
-    --charge:  #0B7A59;   /* power / charging — the accent */
+    --charge:  #0B7A59;
     --charge-soft: #E2EFE7;
-    --anchor:  #9A5B10;   /* the relax anchor — sun amber */
+    --anchor:  #9A5B10;
     --anchor-soft: #F3E7D3;
     --warn:    #9A4A26;
-
     --ff-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --ff-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Charter", Georgia, serif;
     --shadow: 0 1px 2px rgba(27,33,29,.05), 0 6px 20px rgba(27,33,29,.06);
@@ -26,18 +27,9 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper:   #14171A;
-      --paper-2: #1C2126;
-      --ink:     #ECEADF;
-      --muted:   #A2AAA2;
-      --faint:   #7E867E;
-      --line:    #2A3036;
-      --line-2:  #222831;
-      --charge:  #2ECB8E;
-      --charge-soft: #16302A;
-      --anchor:  #E7A24E;
-      --anchor-soft: #3D2E17;
-      --warn:    #E08A5C;
+      --paper:#14171A; --paper-2:#1C2126; --ink:#ECEADF; --muted:#A2AAA2; --faint:#7E867E;
+      --line:#2A3036; --line-2:#222831; --charge:#2ECB8E; --charge-soft:#16302A;
+      --anchor:#E7A24E; --anchor-soft:#3D2E17; --warn:#E08A5C;
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.34);
     }
   }
@@ -56,23 +48,18 @@
 
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--ff-sans);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--ff-sans); line-height: 1.6;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
   .wrap { max-width: 940px; margin: 0 auto; padding: clamp(16px, 4vw, 40px) clamp(16px, 5vw, 40px) 80px; }
-
   h1,h2,h3 { margin: 0; text-wrap: balance; line-height: 1.15; }
   p { margin: 0; }
   .tnum { font-variant-numeric: tabular-nums; }
 
-  /* ---------- day-jump nav (sticky) ---------- */
+  /* day-jump nav (sticky) */
   .daynav {
-    position: sticky; top: 0; z-index: 30;
+    position: sticky; top: 0; z-index: 400;
     display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
     padding: 9px 10px; background: var(--paper);
     background: color-mix(in srgb, var(--paper) 86%, transparent);
@@ -81,73 +68,52 @@
   }
   .daynav a {
     font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-    color: var(--muted); text-decoration: none; padding: 7px 13px; border-radius: 999px;
-    line-height: 1;
+    color: var(--muted); text-decoration: none; padding: 7px 13px; border-radius: 999px; line-height: 1;
   }
   .daynav a:hover, .daynav a:focus-visible { color: var(--charge); background: var(--charge-soft); }
 
-  /* ---------- masthead ---------- */
+  /* masthead */
   .mast { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
   .eyebrow {
     font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
     color: var(--charge); font-weight: 700; margin-bottom: 14px;
   }
-  h1 {
-    font-size: clamp(34px, 7vw, 62px);
-    font-weight: 800; letter-spacing: -.02em;
-  }
+  h1 { font-size: clamp(34px, 7vw, 62px); font-weight: 800; letter-spacing: -.02em; }
   h1 .arrow { color: var(--faint); font-weight: 400; margin: 0 .12em; }
-  .dek {
-    font-family: var(--ff-serif); font-size: clamp(16px, 2.4vw, 20px);
-    color: var(--muted); margin-top: 14px; max-width: 60ch; line-height: 1.5;
-  }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
   .chip {
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 12.5px; font-weight: 600; letter-spacing: .01em;
     padding: 6px 12px; border-radius: 999px;
-    background: var(--paper-2); border: 1px solid var(--line);
-    color: var(--ink);
+    background: var(--paper-2); border: 1px solid var(--line); color: var(--ink);
   }
   .chip b { color: var(--charge); font-weight: 700; }
 
-  /* ---------- route map ---------- */
+  /* route map */
   .mapfig {
-    margin: 24px 0 2px; padding: 22px 20px 16px;
-    background: var(--paper-2); border: 1px solid var(--line);
+    margin: 22px 0 0; padding: 16px; display: flex; flex-direction: column; align-items: flex-start;
+    gap: 12px; background: var(--paper-2); border: 1px solid var(--line);
     border-radius: 16px; box-shadow: var(--shadow);
   }
-  .mapfig svg { display: block; width: 100%; height: auto; overflow: visible; }
-  .route-line {
-    fill: none; stroke: var(--charge); stroke-width: 2.3;
-    stroke-linejoin: round; stroke-linecap: round;
+  #rtmap { height: 360px; width: 100%; border-radius: 12px; z-index: 0; }
+  .maproute {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--charge); text-decoration: none;
+    border: 1px solid color-mix(in srgb, var(--charge) 35%, var(--line));
+    border-radius: 999px; padding: 10px 16px; background: var(--paper); min-height: 24px;
   }
-  .route-tick { stroke: var(--charge); stroke-width: 1; opacity: .5; }
-  .route-dot { fill: var(--paper-2); stroke: var(--charge); stroke-width: 1.3; }
-  .route-anchor { fill: var(--anchor); stroke: var(--paper-2); stroke-width: .8; }
-  .route-stay { fill: var(--ink); stroke: var(--paper-2); stroke-width: .8; }
-  .route-star { fill: var(--charge); stroke: var(--paper-2); stroke-width: .5; }
-  .route-label { fill: var(--ink); font: 700 3px var(--ff-sans); }
-  .route-num { fill: var(--paper-2); font: 800 2.1px var(--ff-sans); }
-  .route-state { fill: var(--faint); font: 600 2.4px var(--ff-sans); letter-spacing: .04em; }
-  .map-legend {
-    display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px;
-    font-size: 11.5px; color: var(--muted); font-weight: 600;
-  }
+  .maproute:hover, .maproute:focus-visible { background: var(--charge-soft); }
+  .map-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 11.5px; color: var(--muted); font-weight: 600; }
   .map-legend span { display: inline-flex; align-items: center; gap: 7px; }
-  .lg-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--charge); box-sizing: border-box; }
+  .lg-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--charge); }
   .lg-anchor { width: 11px; height: 11px; border-radius: 50%; background: var(--anchor); }
-  .lg-stay { width: 10px; height: 10px; background: var(--ink); border-radius: 2px; }
+  .lg-stay { width: 10px; height: 10px; background: var(--ink); border-radius: 50%; }
+  .leaflet-popup-content { font: 400 13px var(--ff-sans); }
+  .leaflet-popup-content strong { font-weight: 800; }
+  .leaflet-popup-content a { color: #0B7A59; font-weight: 700; text-decoration: none; }
 
-  /* ---------- intro ---------- */
-  .lead {
-    font-family: var(--ff-serif); font-size: clamp(16px, 2.3vw, 19px);
-    line-height: 1.62; margin: 30px 0 8px; max-width: 66ch; color: var(--ink);
-  }
-  .lead em { color: var(--charge); font-style: italic; }
-
-  /* two constraint cards */
-  .constraints { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 26px 0 0; }
+  /* constraint cards */
+  .constraints { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 30px 0 0; }
   @media (max-width: 620px){ .constraints { grid-template-columns: 1fr; } }
   .card {
     background: var(--paper-2); border: 1px solid var(--line);
@@ -164,198 +130,92 @@
   .card p b { color: var(--ink); }
   .estnote { font-size: 12.5px; color: var(--faint); margin: 14px 2px 0; font-style: italic; }
 
-  /* ---------- day sections ---------- */
-  section.day { margin-top: 54px; scroll-margin-top: 64px; }
-  .day-head {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap; padding-bottom: 6px;
-  }
-  .day-id {
-    font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--charge); margin-bottom: 6px;
-  }
+  /* day sections */
+  section.day { margin-top: 52px; scroll-margin-top: 64px; }
+  .day-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding-bottom: 6px; }
+  .day-id { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--charge); margin-bottom: 6px; }
   h2.day-route { font-size: clamp(21px, 3.4vw, 28px); font-weight: 800; letter-spacing: -.015em; }
   .day-route .arrow { color: var(--faint); font-weight: 400; margin: 0 .18em; }
   .day-stats { display: flex; gap: 20px; }
   .stat .n { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
   .stat .l { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
 
-  /* battery / SoC meter */
   .socrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
-  .soc {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px; background: var(--paper-2); border: 1px solid var(--line);
-    border-radius: 10px; flex-wrap: wrap; flex: 1 1 300px;
-  }
+  .soc { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; flex-wrap: wrap; flex: 1 1 300px; }
   .soc .lab { font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
-  .battery {
-    position: relative; flex: 1 1 150px; min-width: 130px; height: 20px;
-    border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper);
-    overflow: hidden;
-  }
-  .battery::after {
-    content:""; position:absolute; right:-5px; top:50%; transform:translateY(-50%);
-    width:4px; height:9px; background: var(--line); border-radius:0 2px 2px 0;
-  }
-  .battery .fill {
-    position:absolute; left:0; top:0; bottom:0; width: calc(var(--soc,80) * 1%);
-    background: var(--charge);
-    background: linear-gradient(90deg, var(--charge), color-mix(in srgb, var(--charge) 80%, var(--paper)));
-    border-radius: 4px;
-  }
+  .battery { position: relative; flex: 1 1 150px; min-width: 130px; height: 20px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--paper); overflow: hidden; }
+  .battery::after { content:""; position:absolute; right:-5px; top:50%; transform:translateY(-50%); width:4px; height:9px; background: var(--line); border-radius:0 2px 2px 0; }
+  .battery .fill { position:absolute; left:0; top:0; bottom:0; width: calc(var(--soc,80) * 1%); background: var(--charge); background: linear-gradient(90deg, var(--charge), color-mix(in srgb, var(--charge) 80%, var(--paper))); border-radius: 4px; }
   .soc .val { font-size: 13px; font-weight: 800; color: var(--charge); letter-spacing:.02em; }
-
-  .day-maps {
-    font-size: 12.5px; font-weight: 700; color: var(--charge); text-decoration: none;
-    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
-    border: 1px solid var(--line);
-    border: 1px solid color-mix(in srgb, var(--charge) 35%, var(--line));
-    border-radius: 999px; padding: 10px 16px; background: var(--paper-2); min-height: 24px;
-  }
+  .day-maps { font-size: 12.5px; font-weight: 700; color: var(--charge); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; border: 1px solid var(--line); border: 1px solid color-mix(in srgb, var(--charge) 35%, var(--line)); border-radius: 999px; padding: 10px 16px; background: var(--paper-2); min-height: 24px; }
   .day-maps:hover, .day-maps:focus-visible { background: var(--charge-soft); }
 
-  /* stop list on a route spine */
+  /* stop spine */
   .stops { position: relative; margin: 22px 0 0; padding-left: 34px; }
-  .stops::before {
-    content:""; position:absolute; left: 9px; top: 8px; bottom: 24px; width: 2px;
-    background: var(--charge);
-    background: linear-gradient(var(--charge), color-mix(in srgb, var(--charge) 30%, var(--line)));
-    border-radius: 2px;
-  }
+  .stops::before { content:""; position:absolute; left: 9px; top: 8px; bottom: 24px; width: 2px; background: var(--charge); background: linear-gradient(var(--charge), color-mix(in srgb, var(--charge) 30%, var(--line))); border-radius: 2px; }
   .stop { position: relative; padding: 0 0 22px; }
-  .stop::before {
-    content:""; position:absolute; left: -34px; top: 3px; width: 20px; height: 20px;
-    border-radius: 50%; background: var(--paper);
-    border: 3px solid var(--charge); box-shadow: 0 0 0 3px var(--paper);
-  }
+  .stop::before { content:""; position:absolute; left: -34px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--paper); border: 3px solid var(--charge); box-shadow: 0 0 0 3px var(--paper); }
   .stop.anchor::before { border-color: var(--anchor); background: var(--anchor); }
   .stop.dest::before { border-color: var(--faint); background: var(--faint); }
   .stop.insurance::before { border-style: dashed; }
-
-  .stopcard {
-    background: var(--paper-2); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
-  }
-  .stop.anchor .stopcard {
-    border-color: var(--anchor);
-    border-color: color-mix(in srgb, var(--anchor) 45%, var(--line));
-    background: var(--anchor-soft);
-    background: color-mix(in srgb, var(--anchor-soft) 55%, var(--paper-2));
-  }
+  .stopcard { background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+  .stop.anchor .stopcard { border-color: var(--anchor); border-color: color-mix(in srgb, var(--anchor) 45%, var(--line)); background: var(--anchor-soft); background: color-mix(in srgb, var(--anchor-soft) 55%, var(--paper-2)); }
   .stop-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   h3.stop-name { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
   .stop-name .city { color: var(--muted); font-weight: 600; font-size: 14px; }
   .mi { font-size: 12.5px; font-weight: 700; color: var(--muted); white-space: nowrap; letter-spacing: .02em; }
-
   .stop-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
-  .pill {
-    font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
-    padding: 3px 9px; border-radius: 999px; border: 1px solid transparent;
-  }
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid transparent; }
   .pill.role-anchor { color: var(--anchor); background: var(--anchor-soft); }
   .pill.role-topup  { color: var(--charge); background: var(--charge-soft); }
   .pill.role-ins    { color: var(--muted); border-color: var(--line); background: transparent; }
   .pill.role-dest   { color: var(--muted); border-color: var(--line); background: transparent; }
-  .spec {
-    font-size: 12.5px; font-weight: 700; color: var(--ink); letter-spacing: .01em;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
+  .spec { font-size: 12.5px; font-weight: 700; color: var(--ink); letter-spacing: .01em; display: inline-flex; align-items: center; gap: 6px; }
   .spec .bolt { color: var(--charge); }
   .spec .sep { color: var(--faint); }
-
-  .stopfacts {
-    display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 11px;
-    font-size: 12.5px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums;
-  }
+  .stopfacts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 11px; font-size: 12.5px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
   .stopfacts span { display: inline-flex; align-items: baseline; gap: 5px; }
   .stopfacts .k { color: var(--faint); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
-
   .why { font-family: var(--ff-serif); font-size: 14.5px; line-height: 1.55; color: var(--muted); margin-top: 11px; }
   .why b { color: var(--ink); font-weight: 600; font-family: var(--ff-sans); }
-
+  .reviews { margin-top: 11px; font-size: 13px; line-height: 1.5; color: var(--muted); border-left: 3px solid var(--line-2); padding: 2px 0 2px 12px; }
+  .reviews b { font-family: var(--ff-sans); font-weight: 700; font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 3px; }
   .food { margin-top: 10px; font-family: var(--ff-serif); font-size: 13.5px; color: var(--muted); line-height: 1.5; }
   .food b { font-family: var(--ff-sans); font-weight: 700; font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--charge); margin-right: 7px; }
-
-  /* outbound links — chip-sized for tap targets */
   .out { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line-2); }
-  .out a {
-    font-size: 12px; font-weight: 700; letter-spacing: .01em; color: var(--charge);
-    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-    padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; min-height: 24px;
-  }
+  .out a { font-size: 12px; font-weight: 700; letter-spacing: .01em; color: var(--charge); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; min-height: 24px; }
   .out a:hover, .out a:focus-visible { background: var(--charge-soft); border-color: color-mix(in srgb, var(--charge) 40%, var(--line)); }
   .out a .ext { font-size: 9px; opacity: .65; transform: translateY(-1px); }
   .out a.alt { color: var(--muted); }
 
-  /* tradeoff + note blocks */
-  .note {
-    margin-top: 16px; border-left: 3px solid var(--charge);
-    background: var(--paper-2); border-radius: 0 10px 10px 0;
-    padding: 14px 18px; box-shadow: var(--shadow);
-  }
+  .note { margin-top: 16px; border-left: 3px solid var(--charge); background: var(--paper-2); border-radius: 0 10px 10px 0; padding: 14px 18px; box-shadow: var(--shadow); }
   .note.amber { border-left-color: var(--anchor); }
-  .note h4 {
-    margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--charge); font-weight: 700;
-  }
+  .note h4 { margin: 0 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--charge); font-weight: 700; }
   .note.amber h4 { color: var(--anchor); }
   .note p { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
   .note p:first-of-type { margin-top: 0; }
   .note p b { color: var(--ink); }
   .rec { color: var(--charge); font-weight: 800; }
 
-  .overnight {
-    margin-top: 8px; display: flex; align-items: flex-start; gap: 10px;
-    font-size: 13.5px; color: var(--muted); padding: 12px 16px;
-    background: var(--paper); border: 1px dashed var(--line); border-radius: 10px;
-  }
+  .overnight { margin-top: 8px; display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--muted); padding: 12px 16px; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; }
   .overnight .moon { font-size: 15px; line-height: 1.4; }
   .overnight b { color: var(--ink); }
   .overnight a { color: var(--charge); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--charge) 40%, transparent); }
   .overnight a:hover { border-bottom-color: var(--charge); }
 
-  /* ---------- anchors summary ---------- */
-  .anchors {
-    margin-top: 54px; padding: 26px; border-radius: 16px;
-    background: var(--paper-2);
-    background: color-mix(in srgb, var(--anchor-soft) 40%, var(--paper-2));
-    border: 1px solid var(--line);
-    border: 1px solid color-mix(in srgb, var(--anchor) 30%, var(--line));
-  }
-  .anchors h2 { font-size: 24px; letter-spacing: -.01em; }
-  .anchors .sub { font-family: var(--ff-serif); color: var(--muted); font-size: 14.5px; margin: 6px 0 18px; max-width: 60ch; }
-  .agrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 720px){ .agrid { grid-template-columns: 1fr; } }
-  .acard { background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  .acard .d { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--anchor); }
-  .acard .nm { font-size: 16px; font-weight: 700; margin: 6px 0 6px; letter-spacing: -.01em; }
-  .acard .ds { font-family: var(--ff-serif); font-size: 13.5px; color: var(--muted); line-height: 1.5; }
-
-  /* ---------- checklist ---------- */
-  .verify { margin-top: 54px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .verify { margin-top: 52px; padding-top: 26px; border-top: 1px solid var(--line); }
   .verify h2 { font-size: 24px; letter-spacing: -.01em; }
-  .verify > p { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 64ch; font-family: var(--ff-serif); }
-  .checkcols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
-  @media (max-width: 680px){ .checkcols { grid-template-columns: 1fr; } }
-  .col h4 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
-  .col.done h4 { color: var(--charge); }
-  .col.todo h4 { color: var(--anchor); }
-  ul.ck { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  ul.ck { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
   ul.ck li { position: relative; padding-left: 26px; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
   ul.ck li b { color: var(--ink); font-weight: 600; }
-  ul.ck li::before { position: absolute; left: 0; top: 1px; font-weight: 800; font-size: 13px; }
-  .col.done li::before { content: "✓"; color: var(--charge); }
-  .col.todo li::before { content: "○"; color: var(--anchor); top: 0; }
+  ul.ck li::before { content: "○"; position: absolute; left: 0; top: 0; font-weight: 800; font-size: 13px; color: var(--anchor); }
 
   footer { margin-top: 46px; font-size: 12px; color: var(--faint); text-align: center; line-height: 1.6; }
   footer .dot { margin: 0 6px; }
 
-  /* reveal */
   .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
-  }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1 !important; transform: none !important; transition: none; } }
   a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--charge); outline-offset: 3px; border-radius: 4px; }
 </style>
 </head>
@@ -363,7 +223,7 @@
 
 
 <nav class="daynav" aria-label="Jump to day">
-  <a href="#top">Overview</a>
+  <a href="#top">Top</a>
   <a href="#day1">Day 1 · TX→AR</a>
   <a href="#day2">Day 2 · AR→VA</a>
   <a href="#day3">Day 3 · VA→MA</a>
@@ -375,61 +235,18 @@
   <header class="mast" id="top">
     <div class="eyebrow">Supercharger Route Card · Return Trip</div>
     <h1>Austin <span class="arrow">→</span> Needham</h1>
-    <p class="dek">Chargers chosen as <em>destinations</em>, not waypoints the car picks. Fewer, better stops — shade, seating off the ground, a walkable carry-out, and grass to walk Luna away from the crowd.</p>
     <div class="chips">
       <span class="chip">🚗 Model Y <b>Long Range</b></span>
       <span class="chip">3 days · <b>Jul 9–11</b></span>
       <span class="chip">≈<b>2,005</b> mi</span>
       <span class="chip">Christina + Luna 🐕</span>
-      <span class="chip">Plan legs <b>~230 mi</b></span>
     </div>
 
     <figure class="mapfig">
-      <svg viewBox="0 0 100 32" role="img" aria-labelledby="maptitle mapdesc">
-        <title id="maptitle">Route map: Austin, Texas to Needham, Massachusetts</title>
-        <desc id="mapdesc">A left-to-right diagram of the three-day drive, with two overnight stops — Little Rock and Check, Virginia — and three anchor rest stops (Sulphur Springs, Jackson, and Clinton).</desc>
-        <line class="route-line" x1="4" y1="17" x2="96" y2="17"/>
-        <!-- station ticks -->
-        <g class="route-tick">
-          <line x1="11.7" y1="15" x2="11.7" y2="19"/><line x1="42.3" y1="15" x2="42.3" y2="19"/>
-          <line x1="50" y1="15" x2="50" y2="19"/><line x1="57.7" y1="15" x2="57.7" y2="19"/>
-          <line x1="73" y1="15" x2="73" y2="19"/><line x1="88.3" y1="15" x2="88.3" y2="19"/>
-        </g>
-        <!-- plain top-up dots -->
-        <circle class="route-dot" cx="11.7" cy="17" r="1.4"/>
-        <circle class="route-dot" cx="42.3" cy="17" r="1.4"/>
-        <circle class="route-dot" cx="50" cy="17" r="1.4"/>
-        <circle class="route-dot" cx="57.7" cy="17" r="1.4"/>
-        <circle class="route-dot" cx="73" cy="17" r="1.4"/>
-        <circle class="route-dot" cx="88.3" cy="17" r="1.4"/>
-        <!-- anchor stops -->
-        <circle class="route-anchor" cx="19.3" cy="17" r="1.9"/>
-        <circle class="route-anchor" cx="34.7" cy="17" r="1.9"/>
-        <circle class="route-anchor" cx="80.7" cy="17" r="1.9"/>
-        <!-- start -->
-        <circle class="route-stay" cx="4" cy="17" r="1.9"/>
-        <!-- overnights (squares w/ number) -->
-        <rect class="route-stay" x="25.3" y="15.3" width="3.4" height="3.4" rx="0.6"/>
-        <text class="route-num" x="27" y="18.05" text-anchor="middle">1</text>
-        <rect class="route-stay" x="63.6" y="15.3" width="3.4" height="3.4" rx="0.6"/>
-        <text class="route-num" x="65.3" y="18.05" text-anchor="middle">2</text>
-        <!-- end star -->
-        <path class="route-star" d="M96 14.4 l0.85 1.75 1.9 0.25 -1.4 1.32 0.36 1.9 -1.71 -0.95 -1.71 0.95 0.36 -1.9 -1.4 -1.32 1.9 -0.25 z"/>
-        <!-- node labels (above) -->
-        <text class="route-label" x="4"  y="11.5" text-anchor="start">Austin</text>
-        <text class="route-label" x="27" y="11.5" text-anchor="middle">Little Rock</text>
-        <text class="route-label" x="65.3" y="11.5" text-anchor="middle">Check, VA</text>
-        <text class="route-label" x="96" y="11.5" text-anchor="end">Needham</text>
-        <!-- state row (below) -->
-        <text class="route-state" x="11" y="27" text-anchor="middle">TX</text>
-        <text class="route-state" x="31" y="27" text-anchor="middle">AR</text>
-        <text class="route-state" x="46" y="27" text-anchor="middle">TN</text>
-        <text class="route-state" x="61" y="27" text-anchor="middle">VA</text>
-        <text class="route-state" x="79" y="27" text-anchor="middle">PA · NJ</text>
-        <text class="route-state" x="92" y="27" text-anchor="middle">CT · MA</text>
-      </svg>
+      <div id="rtmap" aria-label="Interactive route map"></div>
+      <a class="maproute" href="https://www.google.com/maps/dir/?api=1&origin=Austin,TX&destination=Needham,MA&waypoints=Little+Rock,AR%7CJackson,TN%7CCheck,VA%7CClinton,NJ&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the Austin to Needham route in Google Maps (new tab)">🗺 Open the full route in Google Maps ↗</a>
       <div class="map-legend">
-        <span><i class="lg-stay"></i> Overnight (1 · Little Rock, 2 · Check VA)</span>
+        <span><i class="lg-stay"></i> Overnight</span>
         <span><i class="lg-anchor"></i> Anchor / relax stop</span>
         <span><i class="lg-dot"></i> Charging top-up</span>
       </div>
@@ -438,21 +255,19 @@
 
   <main>
 
-  <p class="lead">Last trip stacked up too many stops, each chosen for the fewest charging minutes, at exposed strip-mall chargers with nowhere good to be with a reactive dog in the July heat. This time the plan anchors each day on <em>one</em> genuinely pleasant place and keeps everything else short. Two overnight plugs shape the whole thing.</p>
-
   <div class="constraints">
     <div class="card l1">
       <div class="kicker">◐ Little Rock · Level 1 only</div>
       <h3>Arrive ~80%, wake at ~95%</h3>
-      <p>A 120V plug adds just ~3–4 mi/hr → ~45–55 mi overnight. So Day 1's <b>final stop tops up only enough to arrive ~80%</b>. Chasing a true 100% would mean arriving ~85% — not worth it; ~95% covers Day 2's first leg easily.</p>
+      <p>A 120V plug adds ~3–4 mi/hr → ~45–55 mi overnight, so Day 1's <b>last stop tops up only enough to arrive ~80%</b>. ~95% by morning covers Day 2's first leg (224 mi to Jackson) easily.</p>
     </div>
     <div class="card l2">
       <div class="kicker">⚡ Check, VA · Level 2</div>
       <h3>Arrive low, leave full</h3>
-      <p>~25–30 mi/hr recovers a full charge overnight regardless of arrival state. <b>No last-stop constraint on Day 2</b> — roll in low, leave Day 3 at 100%.</p>
+      <p>~25–30 mi/hr recovers a full charge overnight, so <b>no last-stop constraint on Day 2</b> — roll in low, leave Day 3 at 100%.</p>
     </div>
   </div>
-  <p class="estnote">Battery percentages on each stop are planning estimates for a Model Y LR in July heat — confirm the exact numbers with an ABRP run before you leave.</p>
+  <p class="estnote">Battery percentages on each stop are planning estimates for a Model Y LR in July heat — confirm exact numbers with an ABRP run before you leave.</p>
 
   <!-- DAY 1 -->
   <section class="day reveal" id="day1">
@@ -473,7 +288,7 @@
         <div class="battery" style="--soc:80"><div class="fill"></div></div>
         <span class="val">Arrive LR ~80%</span>
       </div>
-      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Austin,TX&destination=Little+Rock,AR&waypoints=Collin+Street+Bakery+Bellmead+TX%7CTesla+Supercharger+Sulphur+Springs+TX%7COutlets+of+Little+Rock+Supercharger&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 1 driving route in Google Maps (new tab)">🗺 Open Day 1 route ↗</a>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Austin,TX&destination=Little+Rock,AR&waypoints=Collin+Street+Bakery+Bellmead+TX%7CTesla+Supercharger+Sulphur+Springs+TX%7COutlets+of+Little+Rock+Supercharger&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 1 driving route in Google Maps (new tab)">🗺 Day 1 route ↗</a>
     </div>
 
     <div class="stops">
@@ -485,11 +300,14 @@
             <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 22 stalls</span>
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~66%</span><span><i class="k">charge to</i> ~90%</span><span><i class="k">→ next</i> 180 mi</span></div>
-          <p class="why">Fresh bakery/deli with an <b>A/C dining room</b>, free coffee for Tesla drivers, and dog treats on the shelf. Best food-plus-fast-charge on the corridor; the indoor cool is the July win. Use the far pedestals for full power. Cafe open to 8 PM (Sun to 7).</p>
+          <p class="why">Bakery/deli with an <b>A/C dining room</b>, free coffee for Tesla drivers, and dog treats on the shelf — the indoor cool is the July win. Use the far pedestals for full power. Cafe open to 8 PM (Sun to 7).</p>
+          <p class="reviews"><b>Reviews</b>22 stalls so rarely a wait, and well-liked for the bakery itself (WiFi, seating, free coffee). Rated 250 kW but real-world sessions often run 80–110 kW, so leave a little slack.</p>
           <p class="food"><b>Food</b>Collin Street Bakery cafe on-site (sandwiches, soups, salads) · Chick-fil-A up the frontage road.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+701+N+I-35+Bellmead+TX" target="_blank" rel="noopener" aria-label="Collin Street Bakery Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/18941" target="_blank" rel="noopener" aria-label="Collin Street Bakery Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/wacotxsupercharger" target="_blank" rel="noopener" aria-label="Collin Street Bakery Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-waco-tx" target="_blank" rel="noopener" aria-label="Collin Street Bakery Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://collinstreet.com/pages/cafe-locations" target="_blank" rel="noopener" aria-label="Collin Street Bakery cafe and menu (new tab)">Cafe &amp; menu <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -503,11 +321,14 @@
             <span class="spec"><span class="bolt">⚡</span>150 kW <span class="sep">·</span> 8 stalls</span>
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~28%</span><span><i class="k">charge to</i> ~100%</span><span><i class="k">→ next</i> 178 mi</span></div>
-          <p class="why">The only real <b>town center</b> on the route: Celebration Plaza with shaded bistro seating, Buford Park's pond and trees, and walkable carry-out. <b>For Luna:</b> walk her a block off the square on quiet side streets, away from the plaza crowd — flexibility a Buc-ee's can't give. 150 kW is fine since you're lingering anyway.</p>
+          <p class="why">The only real <b>town center</b> on the route: Celebration Plaza with shaded bistro seating, Buford Park's pond and trees, and walkable carry-out. <b>For Luna:</b> walk her a block off the square on quiet side streets, away from the plaza crowd. 150 kW is fine since you're lingering anyway.</p>
+          <p class="reviews"><b>Reviews</b>Few reviews, but fondly rated for the town-square setting and no reliability complaints at its 8 stalls. It's a genuine detour off I-30 (the square is the payoff), and trucks sometimes take stalls at lunch.</p>
           <p class="food"><b>Food</b>Corner Grub House (burgers), Arturo's wood-fired pizza, Pioneer Cafe — all on the square, carry-out.</p>
           <div class="out">
-            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+300+W+Tomlinson+St+Sulphur+Springs+TX" target="_blank" rel="noopener" aria-label="Sulphur Springs Supercharger on Google Maps (new tab)">Charger <span class="ext" aria-hidden="true">↗</span></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+300+W+Tomlinson+St+Sulphur+Springs+TX" target="_blank" rel="noopener" aria-label="Sulphur Springs Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/90255" target="_blank" rel="noopener" aria-label="Sulphur Springs Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/sulphurspringstxsupercharger" target="_blank" rel="noopener" aria-label="Sulphur Springs Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-sulphur-springs-tx" target="_blank" rel="noopener" aria-label="Sulphur Springs Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Buford+Park+Sulphur+Springs+TX" target="_blank" rel="noopener" aria-label="Buford Park, Sulphur Springs, on Google Maps (new tab)">Buford Park <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -521,11 +342,14 @@
             <span class="spec"><span class="bolt">⚡</span>325 kW V3 <span class="sep">·</span> 16 stalls</span>
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~39%</span><span><i class="k">charge to</i> ~85%</span><span><i class="k">→ Little Rock</i> 12 mi</span></div>
-          <p class="why">Charge to <b>~85% so you arrive ~80%</b> for the overnight trickle — a quick stop at this fast V3 site. Bonus: a <b>dog park is right there</b> for a last leg-stretch. Alt if busy: North Little Rock Cracker Barrel (16 / 325 kW).</p>
-          <p class="food"><b>Food</b>Food-court quick bites (Auntie Anne's, Leo's Greek) — this is a top-up, not a meal stop.</p>
+          <p class="why">Charge to <b>~85% so you arrive ~80%</b> for the overnight trickle — quick at this fast V3 site. Bonus: a <b>dog park is right there</b> for a last leg-stretch. Alt if busy: North Little Rock Cracker Barrel (16 / 325 kW).</p>
+          <p class="reviews"><b>Reviews</b>Arkansas's original Superchargers — reliable, 24/7, beside the outlet mall with food and clean restrooms. (Distinct from the newer North Little Rock site.)</p>
+          <p class="food"><b>Food</b>Food-court quick bites (Auntie Anne's, Leo's Greek) — a top-up, not a meal.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Outlets+of+Little+Rock" target="_blank" rel="noopener" aria-label="Outlets of Little Rock Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/118147" target="_blank" rel="noopener" aria-label="Outlets of Little Rock Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/littlerocksupercharger" target="_blank" rel="noopener" aria-label="Outlets of Little Rock Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-little-rock-ar" target="_blank" rel="noopener" aria-label="Outlets of Little Rock Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -556,7 +380,7 @@
         <div class="battery" style="--soc:25"><div class="fill"></div></div>
         <span class="val">Arrive Check ~25% → L2</span>
       </div>
-      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Little+Rock,AR&destination=Check,VA&waypoints=Casey+Jones+Village+Jackson+TN%7CTesla+Supercharger+Cookeville+TN%7CTesla+Supercharger+Brookview+Centre+Way+Knoxville+TN%7CTesla+Supercharger+Bristol+VA+Euclid+Ave&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 2 driving route in Google Maps (new tab)">🗺 Open Day 2 route ↗</a>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Little+Rock,AR&destination=Check,VA&waypoints=Casey+Jones+Village+Jackson+TN%7CTesla+Supercharger+Cookeville+TN%7CTesla+Supercharger+Brookview+Centre+Way+Knoxville+TN%7CTesla+Supercharger+Bristol+VA+Euclid+Ave&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 2 driving route in Google Maps (new tab)">🗺 Day 2 route ↗</a>
     </div>
 
     <div class="stops">
@@ -568,11 +392,14 @@
             <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 24 stalls</span>
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~23%</span><span><i class="k">charge to</i> ~95%</span><span><i class="k">→ next</i> 206 mi</span></div>
-          <p class="why">The best stop of the whole trip — the Supercharger sits <b>inside a historic village</b>: Old Country Store buffet, lawns and gardens, shaded walkways, a steam locomotive. Real perimeter grass to walk Luna away from foot traffic, and a long charge that overlaps lunch.</p>
+          <p class="why">The Supercharger sits <b>inside a historic village</b>: Old Country Store buffet, lawns and gardens, shaded walkways, a steam locomotive. Real perimeter grass to walk Luna away from foot traffic, and a long charge that overlaps lunch.</p>
+          <p class="reviews"><b>Reviews</b>Reliable 24-stall V3 with consistently fast sessions and no recurring issues; busiest at meal times since it shares the buffet's lot, and on-site restrooms rate below average.</p>
           <p class="food"><b>Food</b>Old Country Store buffet on-site (order takeaway direct — no to-go boxes from the dining room) + village ice-cream &amp; walkable grounds.</p>
           <div class="out">
-            <a href="https://www.google.com/maps/search/?api=1&query=Casey+Jones+Village+Jackson+TN" target="_blank" rel="noopener" aria-label="Casey Jones Village, Jackson TN, on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Casey+Jones+Village+Jackson+TN" target="_blank" rel="noopener" aria-label="Casey Jones Village on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/100394" target="_blank" rel="noopener" aria-label="Casey Jones Village Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/jacksontnsupercharger" target="_blank" rel="noopener" aria-label="Jackson TN Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-jackson-tn-06eb" target="_blank" rel="noopener" aria-label="Casey Jones Village Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.caseyjones.com/" target="_blank" rel="noopener" aria-label="Casey Jones Village official site (new tab)">Village site <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -587,10 +414,13 @@
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~24%</span><span><i class="k">charge to</i> ~90%</span><span><i class="k">→ next</i> 100 mi</span></div>
           <p class="why"><b>Throttles to ~66 kW when stalls share</b> — allow extra time. Lot-edge grass only; a relief stop, not a lounge. (On the lean 3-charge plan, charge to 90%+ here for the ~215 mi mountain leg to Bristol.)</p>
+          <p class="reviews"><b>Reviews</b>Older 8-stall/150 kW site with slower real speeds (~66 kW logged) and thin, dated reviews. Access tip: it hides behind Grandma's Pancake House ~1.3 mi north of I-40 — enter by Advance Auto Parts.</p>
           <p class="food"><b>Food</b>Jimmy John's &amp; Taco Bell right in the plaza — fast grab. Downtown Cookeville ~1.5 mi if you want nicer.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+377+W+Jackson+St+Cookeville+TN" target="_blank" rel="noopener" aria-label="Cookeville Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/133554" target="_blank" rel="noopener" aria-label="Cookeville Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/cookevilletnsupercharger" target="_blank" rel="noopener" aria-label="Cookeville Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-cookeville-tn" target="_blank" rel="noopener" aria-label="Cookeville Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -603,11 +433,14 @@
             <span class="spec"><span class="bolt">⚡</span>250 kW <span class="sep">·</span> 8 stalls</span>
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~56%</span><span><i class="k">splash to</i> ~70%</span><span><i class="k">→ next</i> 120 mi</span></div>
-          <p class="why">Newer and less congested than old Turkey Creek. A 10-minute splash here removes all risk before the Virginia mountains, and lets you keep Cookeville short. Skip it if range is healthy.</p>
+          <p class="why">Newer and less congested than old Turkey Creek. A 10-minute splash removes all risk before the Virginia mountains, and lets you keep Cookeville short. Skip it if range is healthy.</p>
+          <p class="reviews"><b>Reviews</b>Clean V3 site with “private”-feeling stalls and no reliability complaints — but genuinely hard to find the first time, so allow a few extra minutes navigating into Brookview Town Centre.</p>
           <p class="food"><b>Food</b>Five Guys, Barberitos, Clean Eatz — all in the Brookview development, all carry-out.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Brookview+Centre+Way+Knoxville+TN" target="_blank" rel="noopener" aria-label="Knoxville Brookview Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/340586" target="_blank" rel="noopener" aria-label="Knoxville Brookview Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/KnoxvilleTNSupercharger" target="_blank" rel="noopener" aria-label="Knoxville Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-knoxville-tn-brookview-centre-way" target="_blank" rel="noopener" aria-label="Knoxville Brookview Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -621,12 +454,14 @@
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~28%</span><span><i class="k">charge to</i> ~65%</span><span><i class="k">→ Check</i> ~110 mi</span></div>
           <p class="why">Fast, with on-site food and restrooms. <b>Watch:</b> a new Wytheville–Lithia Rd site (Cracker Barrel, 500 kW) is under construction — a big upgrade if it's live by July.</p>
+          <p class="reviews"><b>Reviews</b>New (late 2023) 250 kW site at a 24/7 Royal Farms with a full kitchen and restrooms; too new for much review data, but light I-81 traffic means little wait is expected. Abingdon is the same setup, even newer and thinner on reviews.</p>
           <p class="food"><b>Food</b>Royal Farms MTO + fried chicken on-site (24/7). Abingdon: Peppermill, Abingdon Commons food hall + a Virginia Creeper Trail dog walk.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1200+Euclid+Ave+Bristol+VA" target="_blank" rel="noopener" aria-label="Bristol VA Supercharger on Google Maps (new tab)">Bristol <span class="ext" aria-hidden="true">↗</span></a>
-            <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+25016+Lee+Highway+Abingdon+VA" target="_blank" rel="noopener" aria-label="Abingdon VA Supercharger on Google Maps (new tab)">Abingdon <span class="ext" aria-hidden="true">↗</span></a>
-            <a class="alt" href="https://www.plugshare.com/location/569351" target="_blank" rel="noopener" aria-label="Bristol VA Supercharger reviews on PlugShare (new tab)">PlugShare · Bristol <span class="ext" aria-hidden="true">↗</span></a>
-            <a class="alt" href="https://www.plugshare.com/location/595397" target="_blank" rel="noopener" aria-label="Abingdon VA Supercharger reviews on PlugShare (new tab)">PlugShare · Abingdon <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.plugshare.com/location/569351" target="_blank" rel="noopener" aria-label="Bristol VA Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/26876" target="_blank" rel="noopener" aria-label="Bristol VA Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-bristol-va-euclid-avenue" target="_blank" rel="noopener" aria-label="Bristol VA Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+25016+Lee+Highway+Abingdon+VA" target="_blank" rel="noopener" aria-label="Abingdon VA Supercharger on Google Maps (new tab)">Abingdon alt <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -669,7 +504,7 @@
         <div class="battery" style="--soc:20"><div class="fill"></div></div>
         <span class="val">Home ~20% (w/ margin)</span>
       </div>
-      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Check,VA&destination=Needham,MA&waypoints=Tesla+Supercharger+Winchester+VA+Berryville+Pike%7CClinton+Station+Diner+NJ%7CTesla+Supercharger+Sturbridge+MA&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 3 driving route in Google Maps (new tab)">🗺 Open Day 3 route ↗</a>
+      <a class="day-maps" href="https://www.google.com/maps/dir/?api=1&origin=Check,VA&destination=Needham,MA&waypoints=Tesla+Supercharger+Winchester+VA+Berryville+Pike%7CClinton+Station+Diner+NJ%7CTesla+Supercharger+Sturbridge+MA&travelmode=driving" target="_blank" rel="noopener" aria-label="Open the full Day 3 driving route in Google Maps (new tab)">🗺 Day 3 route ↗</a>
     </div>
 
     <div class="stops">
@@ -682,10 +517,13 @@
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~26%</span><span><i class="k">charge to</i> ~80%</span><span><i class="k">→ next</i> 195 mi</span></div>
           <p class="why">Sheetz Made-To-Order is the best fast-casual carry-out on the first half — touchscreen order, real food, fast. Lot-edge grass for a quick dog leg; a ~20–25 min V3 top-up is exactly the length of a food order and a walk.</p>
-          <p class="food"><b>Food</b>Sheetz Made-To-Order on-site (24/7). Old Town Winchester walking mall ~3 mi if you want a longer break.</p>
+          <p class="reviews"><b>Reviews</b>Best-documented of the new VA sites — reliable 250 kW with real spare capacity (owners find open stalls even on summer weekends), and the attached Sheetz covers food and restrooms.</p>
+          <p class="food"><b>Food</b>Sheetz Made-To-Order on-site (24/7). Old Town Winchester walking mall ~3 mi for a longer break.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+1683+Berryville+Pike+Winchester+VA" target="_blank" rel="noopener" aria-label="Winchester Sheetz Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/344908" target="_blank" rel="noopener" aria-label="Winchester Sheetz Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/WinchesterVAsupercharger" target="_blank" rel="noopener" aria-label="Winchester Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-winchester-va" target="_blank" rel="noopener" aria-label="Winchester Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
       </div>
@@ -699,10 +537,12 @@
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~13%</span><span><i class="k">charge to</i> ~85%</span><span><i class="k">→ next</i> 190 mi</span></div>
           <p class="why">An actual <b>place</b>, not a lot: a 1927 rail-car diner with a famous dessert case, sit-down or carry-out — and it lands <b>right before</b> the I-287 / Tappan Zee / NYC crunch. <b>For Luna:</b> historic downtown Clinton (the Red Mill and the South Branch Raritan riverside walk) is ~1 mi away — quiet grass and water, away from crowds.</p>
+          <p class="reviews"><b>Reviews</b>A modern 250 kW bank (the diner advertises 15 stalls) right at the landmark diner; it can see road-trip surges on I-78 but has no chronic wait or dead-stall reports. (No TezLab page yet.)</p>
           <p class="food"><b>Food</b>Diner on-site; downtown ~1 mi — Art Alley (river patio), Towne Restaurant, Scoops for ice cream.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Clinton+Station+Diner+Clinton+NJ" target="_blank" rel="noopener" aria-label="Clinton Station Diner on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/604854" target="_blank" rel="noopener" aria-label="Clinton Station Diner Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/20974" target="_blank" rel="noopener" aria-label="Clinton NJ Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.google.com/maps/search/?api=1&query=Red+Mill+Museum+Clinton+NJ" target="_blank" rel="noopener" aria-label="Red Mill and riverside walk, Clinton NJ, on Google Maps (new tab)">Red Mill / river walk <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -717,10 +557,13 @@
           </div>
           <div class="stopfacts"><span><i class="k">in</i> ~19%</span><span><i class="k">charge to</i> ~40%</span><span><i class="k">→ home</i> 55 mi</span></div>
           <p class="why">After Danbury, Waterbury and Hartford: a pleasant New England town at the I-84 / Mass Pike seam with real greenspace (town common, Old Sturbridge Village grounds) for a proper dog walk. Only <b>~55 mi from home</b> — charge just enough to finish, keep it short.</p>
+          <p class="reviews"><b>Reviews</b>12-stall V3 in a plaza with a supermarket, well-placed at the I-84/Mass Pike junction; review volume is light but nothing flags reliability or wait problems.</p>
           <p class="food"><b>Food</b>Cedar Street Café (outdoor patio; breakfast/lunch to 1:30) · Teddy G's Pub &amp; Grille. Sturbridge Common for a dog walk.</p>
           <div class="out">
             <a href="https://www.google.com/maps/search/?api=1&query=Tesla+Supercharger+Sturbridge+MA" target="_blank" rel="noopener" aria-label="Sturbridge Supercharger on Google Maps (new tab)">Maps <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://www.plugshare.com/location/510101" target="_blank" rel="noopener" aria-label="Sturbridge Supercharger reviews on PlugShare (new tab)">PlugShare <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tesla.com/findus/location/supercharger/26672" target="_blank" rel="noopener" aria-label="Sturbridge Supercharger on Tesla.com (new tab)">Tesla <span class="ext" aria-hidden="true">↗</span></a>
+            <a class="alt" href="https://www.tezlabapp.com/map/charger/tesla-supercharger-sturbridge-ma" target="_blank" rel="noopener" aria-label="Sturbridge Supercharger recent charges on TezLab (new tab)">TezLab <span class="ext" aria-hidden="true">↗</span></a>
             <a class="alt" href="https://cedarstreetcafesturbridge.com/" target="_blank" rel="noopener" aria-label="Cedar Street Café, Sturbridge (new tab)">Cedar Street Café <span class="ext" aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -737,58 +580,19 @@
 
     <div class="note amber">
       <h4>The tradeoff · 3 vs 4 charges</h4>
-      <p><span class="rec" style="color:var(--anchor)">Recommended — 3 charges:</span> Winchester → Clinton → Sturbridge. Spacing 215 / 195 / 190 / 55 mi — every leg under 230 with buffer, all three 250 kW V3. Clean.</p>
-      <p><b>Conservative — add a 4th:</b> a short splash at Southington, CT (Target, 250 kW) splits the Clinton→Sturbridge leg if the hilly, traffic-heavy CT stretch leaves you wanting cushion. Fast insurance, not a relax stop — save that for Sturbridge.</p>
+      <p><span class="rec" style="color:var(--anchor)">Recommended — 3 charges:</span> Winchester → Clinton → Sturbridge. Spacing 215 / 195 / 190 / 55 mi — every leg under 230 with buffer, all three 250 kW V3.</p>
+      <p><b>Conservative — add a 4th:</b> a short splash at Southington, CT (Target, 250 kW) splits the Clinton→Sturbridge leg if the hilly, traffic-heavy CT stretch leaves you wanting cushion.</p>
     </div>
   </section>
 
-  <!-- ANCHORS -->
-  <div class="anchors reveal">
-    <h2>The anchor stops</h2>
-    <p class="sub">One place a day worth lingering at. Everything else is a short, deliberate top-up. Chargers go into nav in order, as chosen destinations — the car doesn't auto-pick.</p>
-    <div class="agrid">
-      <div class="acard">
-        <div class="d">Day 1</div>
-        <div class="nm">Sulphur Springs Square</div>
-        <div class="ds">Shaded plaza seating, walkable carry-out, quiet grass a block off-square for Luna. (Plus a cool A/C lunch at Waco.)</div>
-      </div>
-      <div class="acard">
-        <div class="d">Day 2</div>
-        <div class="nm">Casey Jones Village</div>
-        <div class="ds">Buffet lunch on-site, village lawns and gardens to walk the dog, a fast 250 kW / 24-stall site.</div>
-      </div>
-      <div class="acard">
-        <div class="d">Day 3</div>
-        <div class="nm">Clinton Station Diner</div>
-        <div class="ds">A real diner with a riverside dog walk nearby, positioned right before the NYC crunch. (Sturbridge is the exhale after.)</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VERIFY -->
   <div class="verify reveal" id="checklist">
-    <h2>Verification &amp; pre-departure</h2>
-    <p>Every chosen Supercharger was cross-checked against open data (supercharge.info inventory + OpenStreetMap). PlugShare and ABRP are closed apps that can't be queried directly — those stay a browser step the week of travel.</p>
-    <div class="checkcols">
-      <div class="col done">
-        <h4>Verified now</h4>
-        <ul class="ck">
-          <li>All stops <b>confirmed open</b> with correct coordinates; specs matched — <b>except Little Rock Outlets, which is better than assumed</b> (16 / 325 kW V3).</li>
-          <li>Strong quick-food clusters at Hope, Cookeville, Knoxville, Abingdon; every stop's food links checked live.</li>
-          <li>Anchor greenspace (Buford Park, Casey Jones grounds, Clinton riverside, Sturbridge common) is human-verified — OSM just doesn't tag it.</li>
-          <li><b>Upgrades to watch:</b> Wytheville–Lithia Rd (500 kW, under construction); Waco–Circle Rd (Rudy's, 325 kW, permitted).</li>
-        </ul>
-      </div>
-      <div class="col todo">
-        <h4>Do the week of travel</h4>
-        <ul class="ck">
-          <li>Check <b>live stall availability</b> on the PlugShare app (uptime, ICE-ing, queues).</li>
-          <li>Confirm <b>carry-out hours vs. ETA</b> — Collin Street Bakery to 8 PM; Casey Jones buffet; Cedar Street Café to 1:30 PM.</li>
-          <li>One <b>ABRP run</b> (Model Y LR + July temp) to lock the exact arrival percentages shown on each stop.</li>
-          <li>Pick <b>3- vs 4-charge</b> for Days 2 &amp; 3 the morning-of, from actual SoC and weather.</li>
-        </ul>
-      </div>
-    </div>
+    <h2>Before you go</h2>
+    <ul class="ck">
+      <li>Check <b>live stall availability</b> on the PlugShare app the week of travel (uptime, ICE-ing, queues).</li>
+      <li>Confirm <b>carry-out hours vs. ETA</b> — Collin Street Bakery to 8 PM; Casey Jones buffet; Cedar Street Café to 1:30 PM.</li>
+      <li>One <b>ABRP run</b> (Model Y LR + July temp) to lock the exact arrival percentages shown on each stop.</li>
+      <li>Pick <b>3- vs 4-charge</b> for Days 2 &amp; 3 the morning-of, from actual SoC and weather.</li>
+    </ul>
   </div>
 
   </main>
@@ -816,5 +620,46 @@
   })();
 </script>
 
+
+<script>
+(function(){
+  if (typeof L === 'undefined') return;
+  var S = [
+    {n:"Austin, TX", t:"stay", lat:30.2672, lng:-97.7431, d:"Start"},
+    {n:"Collin Street Bakery — Waco", t:"topup", lat:31.58224, lng:-97.10915, d:"250 kW · 22 stalls", ps:"18941", ts:"wacotxsupercharger"},
+    {n:"Sulphur Springs Square", t:"anchor", lat:33.13709, lng:-95.60328, d:"150 kW · 8 stalls — anchor", ps:"90255", ts:"sulphurspringstxsupercharger"},
+    {n:"Outlets of Little Rock", t:"topup", lat:34.6614, lng:-92.41031, d:"325 kW V3 · 16 stalls", ps:"118147", ts:"littlerocksupercharger"},
+    {n:"Little Rock — overnight (L1)", t:"stay", lat:34.7465, lng:-92.2896, d:"Night 1"},
+    {n:"Casey Jones Village — Jackson", t:"anchor", lat:35.66035, lng:-88.85577, d:"250 kW · 24 stalls — anchor", ps:"100394", ts:"jacksontnsupercharger"},
+    {n:"Cookeville — Jackson Plaza", t:"topup", lat:36.15585, lng:-85.51521, d:"150 kW · 8 stalls", ps:"133554", ts:"cookevilletnsupercharger"},
+    {n:"Knoxville — Brookview", t:"topup", lat:35.93585, lng:-84.00415, d:"250 kW · 8 stalls — insurance", ps:"340586", ts:"KnoxvilleTNSupercharger"},
+    {n:"Bristol, VA — Royal Farms", t:"topup", lat:36.60191, lng:-82.19144, d:"250 kW · 8 stalls", ps:"569351", ts:"26876"},
+    {n:"Abingdon, VA — Royal Farms", t:"topup", lat:36.71229, lng:-81.9287, d:"250 kW · 8 stalls", ps:"595397", ts:"26874"},
+    {n:"Check, VA — overnight (L2)", t:"stay", lat:36.9312, lng:-80.1698, d:"Night 2"},
+    {n:"Winchester — Sheetz", t:"topup", lat:39.18814, lng:-78.12579, d:"250 kW · 8 stalls", ps:"344908", ts:"WinchesterVAsupercharger"},
+    {n:"Clinton Station Diner", t:"anchor", lat:40.63385, lng:-74.9377, d:"250 kW · 12–15 stalls — anchor", ps:"604854", ts:"20974"},
+    {n:"Sturbridge Plaza", t:"topup", lat:42.09855, lng:-72.0726, d:"250 kW · 12 stalls", ps:"510101", ts:"26672"},
+    {n:"Needham, MA", t:"stay", lat:42.2809, lng:-71.2378, d:"Home"}
+  ];
+  var col = {stay:"#1B211D", anchor:"#B8701A", topup:"#0B7A59"};
+  var map = L.map('rtmap', {scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:18, attribution:'© OpenStreetMap contributors'}).addTo(map);
+  var line = [];
+  S.forEach(function(s){
+    line.push([s.lat, s.lng]);
+    var links = [];
+    if (s.ps) links.push('<a href="https://www.plugshare.com/location/'+s.ps+'" target="_blank" rel="noopener">PlugShare</a>');
+    if (s.ts) links.push('<a href="https://www.tesla.com/findus/location/supercharger/'+s.ts+'" target="_blank" rel="noopener">Tesla</a>');
+    var html = '<strong>'+s.n+'</strong>' + (s.d ? '<br>'+s.d : '') + (links.length ? '<br>'+links.join(' · ') : '');
+    L.circleMarker([s.lat, s.lng], {
+      radius: s.t==='anchor' ? 7 : 6,
+      color: '#fff', weight: 1.5, fillColor: col[s.t], fillOpacity: 1
+    }).addTo(map).bindPopup(html);
+  });
+  L.polyline(line, {color:'#0B7A59', weight:3, opacity:.65}).addTo(map);
+  map.fitBounds(line, {padding:[26,26]});
+})();
+</script>
 </body>
 </html>
